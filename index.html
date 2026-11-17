@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Interaktif - Tradisi, Kearifan Lokal, dan Budaya</title>
+<style>
+:root{--navy:#183153;--blue:#2563eb;--teal:#0f766e;--gold:#f59e0b;--bg:#f2f6fb;--ink:#1f2937}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(135deg,#e8f2ff,#fff7e6);color:var(--ink);min-height:100vh;padding:22px}
+.container{max-width:850px;margin:0 auto}
+header{text-align:center;margin:8px 0 22px}
+.tag{display:inline-block;background:#dbeafe;color:#1d4ed8;border-radius:30px;padding:7px 14px;font-size:13px;font-weight:bold}
+h1{color:var(--navy);font-size:clamp(25px,4vw,36px);margin:12px 0 7px}
+.subtitle{color:#526174;margin:0}
+.card{background:#fff;border-radius:22px;padding:clamp(20px,4vw,34px);box-shadow:0 12px 35px #18315318;border:1px solid #e5edf7}
+.stats{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.stat{background:#f3f7fc;border-radius:12px;padding:10px 14px;font-size:14px;color:#42536a}
+.stat strong{color:var(--navy);font-size:17px}
+.progress-wrap{height:9px;background:#e8edf5;border-radius:20px;overflow:hidden;margin:12px 0 24px}
+.progress{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--teal));transition:width .3s}
+.q-label{font-size:13px;font-weight:bold;color:var(--teal);letter-spacing:.5px;text-transform:uppercase}
+.question{font-size:clamp(19px,3vw,24px);line-height:1.4;color:var(--navy);margin:12px 0 22px;font-weight:700}
+.options{display:grid;gap:12px}
+.option{border:2px solid #e3eaf3;background:#fff;border-radius:13px;padding:14px 16px;text-align:left;font-size:16px;cursor:pointer;transition:.15s;color:#263548}
+.option:hover:not(:disabled){border-color:#78a5f8;background:#f5f9ff;transform:translateY(-1px)}
+.option.selected{border-color:var(--blue);background:#eff6ff}
+.option.correct{border-color:#16a34a;background:#f0fdf4}
+.option.wrong{border-color:#dc2626;background:#fef2f2}
+.option:disabled{cursor:default}
+.controls{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:24px}
+button.primary{background:var(--blue);color:white;border:0;border-radius:12px;padding:13px 22px;font-weight:bold;font-size:15px;cursor:pointer}
+button.primary:hover{background:#1d4ed8}
+button.primary:disabled{opacity:.45;cursor:not-allowed}
+.note{font-size:14px;color:#64748b}
+.hidden{display:none!important}
+.result{text-align:center}
+.score{font-size:54px;font-weight:800;color:var(--teal);margin:12px 0 4px}
+.result h2{color:var(--navy)}
+.result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px 0}
+.result-box{background:#f3f7fc;border-radius:14px;padding:14px 8px}
+.result-box strong{display:block;font-size:22px;color:var(--navy);margin-bottom:4px}
+.review{text-align:left;margin-top:25px}
+.review-item{padding:14px 0;border-top:1px solid #e5edf7;font-size:14px;line-height:1.5}
+.good{color:#15803d;font-weight:bold}.bad{color:#b91c1c;font-weight:bold}
+.intro{text-align:center}
+.intro p{line-height:1.65;color:#526174}
+.rules{display:inline-block;text-align:left;background:#f5f9ff;border-radius:14px;padding:15px 22px;margin:12px 0 20px;line-height:1.8}
+@media(max-width:520px){body{padding:12px}.result-grid{grid-template-columns:1fr}.controls{align-items:stretch}.controls button{flex:1}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <span class="tag">PENDIDIKAN PANCASILA • KELAS IX SMP</span>
+  <h1>Jelajah Budaya Nusantara</h1>
+  <p class="subtitle">Kuis interaktif: Peran Tradisi, Kearifan Lokal, dan Budaya</p>
+</header>
+
+<section id="startScreen" class="card intro">
+  <h2>Siap Menguji Pengetahuanmu?</h2>
+  <p>Jawablah 10 soal pilihan ganda tentang peran tradisi, kearifan lokal, dan budaya dalam kehidupan masyarakat. Soal akan muncul satu per satu.</p>
+  <div class="rules">
+    <div>📝 Jumlah soal: <b>10 soal</b></div>
+    <div>⏱️ Waktu dihitung sejak permainan dimulai</div>
+    <div>⭐ Setiap jawaban benar bernilai 10 poin</div>
+    <div>📊 Nilai, waktu, dan pembahasan tampil di akhir</div>
+  </div><br>
+  <button class="primary" onclick="startQuiz()">Mulai Permainan</button>
+</section>
+
+<section id="quizScreen" class="card hidden">
+  <div class="stats">
+    <div class="stat">Soal <strong id="counter">1/10</strong></div>
+    <div class="stat">Skor sementara <strong id="liveScore">0</strong></div>
+    <div class="stat">Waktu <strong id="timer">00:00</strong></div>
+  </div>
+  <div class="progress-wrap"><div class="progress" id="progress"></div></div>
+  <div class="q-label" id="qLabel">Pertanyaan 1</div>
+  <div class="question" id="question"></div>
+  <div class="options" id="options"></div>
+  <div class="controls">
+    <span class="note" id="feedback">Pilih satu jawaban yang paling tepat.</span>
+    <button class="primary" id="nextBtn" onclick="nextQuestion()" disabled>Soal Berikutnya →</button>
+  </div>
+</section>
+
+<section id="resultScreen" class="card result hidden">
+  <span class="tag">PERMAINAN SELESAI</span>
+  <h2>Hasil Jelajah Budaya Nusantara</h2>
+  <div class="score" id="finalScore">0</div>
+  <div>Nilai akhir</div>
+  <div class="result-grid">
+    <div class="result-box"><strong id="correctCount">0/10</strong><span>Jawaban benar</span></div>
+    <div class="result-box"><strong id="wrongCount">0</strong><span>Jawaban salah</span></div>
+    <div class="result-box"><strong id="finalTime">00:00</strong><span>Waktu penyelesaian</span></div>
+  </div>
+  <h3 id="message"></h3>
+  <button class="primary" onclick="restartQuiz()">Main Lagi ↻</button>
+  <div class="review"><h3>Ulasan Jawaban</h3><div id="reviewList"></div></div>
+</section>
+</div>
+
+<script>
+const questions = [
+ {q:"Masyarakat di suatu desa mengadakan tradisi gotong royong membersihkan saluran irigasi sebelum musim tanam. Peran utama tradisi tersebut adalah ....",a:["meningkatkan persaingan antarwarga","memperkuat kebersamaan dan kepedulian sosial","menghilangkan seluruh kebiasaan baru","membatasi hubungan dengan masyarakat lain"],k:1,e:"Gotong royong memperkuat persatuan, solidaritas, dan kepedulian terhadap kepentingan bersama."},
+ {q:"Warga suatu daerah memiliki aturan adat untuk menjaga hutan dan sumber mata air. Aturan tersebut merupakan contoh kearifan lokal yang berperan dalam ....",a:["mengeksploitasi alam sebanyak-banyaknya","melestarikan lingkungan secara berkelanjutan","menghambat semua kegiatan masyarakat","menggantikan seluruh peraturan negara"],k:1,e:"Kearifan lokal memuat pengetahuan dan nilai masyarakat yang membantu menjaga keseimbangan alam."},
+ {q:"Sekelompok remaja mempelajari tarian daerah dan mengunggah penampilannya ke media sosial. Tindakan tersebut menunjukkan bahwa budaya dapat ....",a:["dikenalkan kepada masyarakat yang lebih luas","hanya dinikmati oleh orang tua","dihilangkan karena perkembangan teknologi","dipisahkan dari identitas bangsa"],k:0,e:"Teknologi dapat menjadi sarana memperkenalkan dan mempromosikan budaya kepada masyarakat luas."},
+ {q:"Di tengah masuknya budaya asing, generasi muda tetap menggunakan bahasa daerah ketika berkomunikasi dengan keluarga. Sikap tersebut mencerminkan ....",a:["penolakan terhadap semua kemajuan","upaya menjaga identitas dan warisan budaya","sikap tidak menghargai bahasa Indonesia","keinginan menghindari pergaulan"],k:1,e:"Penggunaan bahasa daerah secara tepat merupakan salah satu upaya menjaga identitas dan warisan budaya."},
+ {q:"Tradisi musyawarah di suatu masyarakat mengajarkan warga untuk mendengarkan pendapat orang lain sebelum mengambil keputusan. Nilai Pancasila yang paling tampak adalah ....",a:["Ketuhanan Yang Maha Esa","Kemanusiaan yang Adil dan Beradab","Persatuan Indonesia","Kerakyatan yang Dipimpin oleh Hikmat Kebijaksanaan dalam Permusyawaratan/Perwakilan"],k:3,e:"Musyawarah untuk mencapai keputusan bersama sesuai dengan sila keempat Pancasila."},
+ {q:"Sebuah kelompok warga mengembangkan makanan tradisional menjadi produk kemasan yang dipasarkan secara daring. Peran budaya dalam kegiatan tersebut adalah ....",a:["menghambat kegiatan ekonomi","mendorong kreativitas dan peluang ekonomi","membuat produk lokal tidak dikenal","menghilangkan nilai tradisional makanan"],k:1,e:"Warisan kuliner dapat dikembangkan secara kreatif sehingga membuka peluang usaha dan meningkatkan ekonomi masyarakat."},
+ {q:"Ketika mengikuti festival budaya daerah lain, para siswa menghargai perbedaan pakaian adat, tarian, dan bahasa. Sikap tersebut penting untuk ....",a:["menumbuhkan toleransi dan persatuan","menentukan budaya yang paling unggul","menghapus ciri khas setiap daerah","membatasi pertemanan antardaerah"],k:0,e:"Menghargai keragaman budaya menumbuhkan toleransi dan memperkuat persatuan bangsa."},
+ {q:"Suatu tradisi mulai ditinggalkan karena dianggap tidak sesuai dengan perkembangan zaman. Langkah paling tepat agar tradisi tetap lestari adalah ....",a:["memaksakan seluruh bentuk tradisi tanpa perubahan","mendokumentasikan, mempelajari, dan menyesuaikannya secara bijak","melarang generasi muda mengenal budaya lain","membiarkan tradisi hilang begitu saja"],k:1,e:"Pelestarian dapat dilakukan melalui dokumentasi, pendidikan, pewarisan, dan penyesuaian yang tetap menghormati nilai luhur."},
+ {q:"Kearifan lokal berupa larangan menangkap ikan pada waktu tertentu diterapkan agar ikan dapat berkembang biak. Manfaat aturan tersebut bagi generasi mendatang adalah ....",a:["sumber daya alam tetap tersedia","hasil laut cepat habis","masyarakat kehilangan mata pencaharian","lingkungan tidak perlu dijaga"],k:0,e:"Pengaturan pemanfaatan sumber daya alam membantu menjaga kelestarian dan ketersediaannya bagi generasi berikutnya."},
+ {q:"Dalam masyarakat global, sikap terbaik terhadap tradisi, kearifan lokal, dan budaya Indonesia adalah ....",a:["menolak seluruh pengaruh dari luar","menganggap budaya sendiri selalu lebih baik","melestarikan budaya sendiri sambil terbuka dan selektif terhadap budaya lain","mengikuti semua budaya asing tanpa pertimbangan"],k:2,e:"Sikap yang tepat ialah bangga dan melestarikan budaya sendiri, sekaligus terbuka secara kritis terhadap budaya lain."}
+];
+let current=0, score=0, selected=null, answers=[], startTime=0, timerHandle=null, elapsed=0;
+const $=id=>document.getElementById(id);
+function formatTime(sec){const m=Math.floor(sec/60),s=sec%60;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
+function startClock(){timerHandle=setInterval(()=>{$('timer').textContent=formatTime(Math.floor((Date.now()-startTime)/1000))},250)}
+function startQuiz(){
+ $('startScreen').classList.add('hidden');$('resultScreen').classList.add('hidden');$('quizScreen').classList.remove('hidden');
+ current=0;score=0;answers=[];startTime=Date.now();$('liveScore').textContent='0';startClock();showQuestion();
+}
+function showQuestion(){
+ selected=null;const item=questions[current];
+ $('counter').textContent=(current+1)+'/10';$('qLabel').textContent='Pertanyaan '+(current+1);
+ $('question').textContent=item.q;$('progress').style.width=(current/10*100)+'%';
+ $('feedback').textContent='Pilih satu jawaban yang paling tepat.';
+ $('nextBtn').disabled=true;$('nextBtn').textContent=current===9?'Lihat Hasil':'Soal Berikutnya →';
+ const box=$('options');box.innerHTML='';
+ item.a.forEach((answer,i)=>{
+  const b=document.createElement('button');b.className='option';b.type='button';
+  b.textContent=String.fromCharCode(65+i)+'. '+answer;
+  b.onclick=()=>chooseAnswer(i,b);box.appendChild(b);
+ });
+}
+function chooseAnswer(index,button){
+ if(selected!==null)return;selected=index;const item=questions[current];const buttons=[...$('options').children];
+ buttons.forEach((b,i)=>{b.disabled=true;if(i===item.k)b.classList.add('correct');if(i===index&&index!==item.k)b.classList.add('wrong')});
+ const isCorrect=index===item.k;if(isCorrect){score+=10;$('feedback').textContent='Benar! +10 poin';$('feedback').style.color='#15803d'}
+ else{$('feedback').textContent='Belum tepat. '+item.e;$('feedback').style.color='#b91c1c'}
+ answers.push({selected:index,correct:isCorrect});$('liveScore').textContent=score;$('nextBtn').disabled=false;
+}
+function nextQuestion(){if(selected===null)return;current++;if(current<questions.length)showQuestion();else finishQuiz()}
+function finishQuiz(){
+ clearInterval(timerHandle);elapsed=Math.floor((Date.now()-startTime)/1000);
+ $('quizScreen').classList.add('hidden');$('resultScreen').classList.remove('hidden');
+ const correct=answers.filter(a=>a.correct).length;
+ $('finalScore').textContent=score;$('correctCount').textContent=correct+'/10';$('wrongCount').textContent=10-correct;$('finalTime').textContent=formatTime(elapsed);
+ $('message').textContent=score>=90?'Luar biasa! Kamu sangat memahami materi.':score>=70?'Bagus! Terus tingkatkan pemahamanmu.':score>=50?'Cukup baik. Pelajari kembali beberapa materi, ya.':'Tetap semangat! Ayo pelajari kembali materi dan coba lagi.';
+ $('progress').style.width='100%';const list=$('reviewList');list.innerHTML='';
+ questions.forEach((q,i)=>{const a=answers[i];const div=document.createElement('div');div.className='review-item';
+ div.innerHTML='<b>Soal '+(i+1)+':</b> '+q.q+'<br><span class="'+(a.correct?'good':'bad')+'">'+(a.correct?'✓ Benar':'✗ Salah')+'</span> — Jawaban benar: <b>'+String.fromCharCode(65+q.k)+'. '+q.a[q.k]+'</b><br><span>'+q.e+'</span>';list.appendChild(div)});
+}
+function restartQuiz(){clearInterval(timerHandle);$('resultScreen').classList.add('hidden');$('startScreen').classList.remove('hidden');$('timer').textContent='00:00'}
+</script>
+</body>
+</html>
